@@ -3,7 +3,6 @@ import csv from 'csvtojson'
 import moment from 'moment'
 
 import Daily from '../models/Daily'
-import Utils from '../utils'
 
 const router = Router()
 

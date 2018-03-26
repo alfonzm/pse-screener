@@ -1,10 +1,26 @@
+import { Router } from 'express'
+import csv from 'csvtojson'
+import _ from 'lodash'
+
+import Daily from '../models/Daily'
+import Utils from '../../utils/utils'
+
+const router = Router()
+
 /* GET latest daily stock data */
-router.get('/dailies/latest', function (req, res, next) {
-	const d = Daily.today((daily) => {
+router.get('/dailies/:date?', function (req, res, next) {
+	const returnResult = (daily) => {
+		let dailyObject = daily.toObject()
+		dailyObject.data = _.reject(dailyObject.data, (d) => { return Utils.indexes.includes(d.stock) })
+		res.json(dailyObject)
+	}
+
+	const d = Daily.latest((daily) => {
 		if(!daily) {
 			let stocks = []
 			// If no daily on db, get from CSV and save to mongodb
-			csv().fromFile(`csv/${Utils.getLatestTradingDate().format('YYYYMMDD')}.csv`)
+			csv({ noheader: false, headers: Utils.csvHeaders })
+			.fromFile(`csv/${Utils.getLatestTradingDate().format('YYYYMMDD')}.csv`)
 			.on('json', (stockRow) => {
 				stocks.push(stockRow)
 			})
@@ -13,12 +29,15 @@ router.get('/dailies/latest', function (req, res, next) {
 					res.json(error)
 				}
 
-				var daily = new Daily({ data: stocks })
+				var daily = new Daily({ data: stocks, date: Utils.getLatestTradingDate() })
+				console.log("SAVE")
 				daily.save()
-				res.json(daily)
+				returnResult(daily)
 			})
 		} else {
-			res.json(daily)
+			returnResult(daily)
 		}
 	})
 })
+
+export default router

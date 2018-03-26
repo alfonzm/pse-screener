@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import _ from 'lodash'
 import fs from 'fs'
+import path from 'path'
 
 import stocks from './stocks'
 import dailies from './dailies'
@@ -13,6 +14,14 @@ router.use(dailies)
 
 router.get('/', (req, res) => {
 	res.sendFile(__dirname + '/index.html')
+})
+
+router.get('/dates', (req, res) => {
+	fs.readdir('csv/', (err, files) => {
+		let dateList = _.map(files, (f) => { return path.parse(f).name })
+		dateList = _.orderBy(dateList, ['desc'])
+		res.json(dateList)
+	})
 })
 
 // router.get('/stock/:symbol', (req, res) => {
