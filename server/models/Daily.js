@@ -35,20 +35,25 @@ let dailySchema = new Schema({
 	data: [dataSchema]
 }, { strict:false })
 
-dailySchema.statics.latest = function (callback) {
-	const latest = Utils.getLatestTradingDate()
-	const tomorrow = moment(latest).add(1, 'days')
+function getByDate(daily, momentDate, callback) {
+	const tomorrow = moment(momentDate).add(1, 'days')
 
-	console.log("FIND", latest, tomorrow)
-
-	this.find({
+	daily.find({
 		date: {
-			$gte: latest.toDate(),
+			$gte: momentDate.toDate(),
 			$lt: tomorrow.toDate()
 		}
 	}).exec((err, dailies) => {
 		callback(dailies[0])
 	})
+}
+
+dailySchema.statics.getByDate = function(momentDate, callback) {
+	getByDate(this, momentDate, callback)
+}
+
+dailySchema.statics.latest = function (callback) {
+	getByDate(this, Utils.getLatestTradingDate(), callback)
 }
 
 var Daily = mongoose.model('Daily', dailySchema)

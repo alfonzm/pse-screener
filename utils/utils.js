@@ -2,6 +2,7 @@ import moment from 'moment'
 import csvHeaders from './CsvHeaders'
 
 export default {
+	// returns moment date of latest trading date (e.g. if today is Sat, returns Fri date)
 	getLatestTradingDate: () => {
 		var latestTradingDate = moment()
 		while(latestTradingDate.format('d') == 0 || latestTradingDate.format('d') == 6) {
