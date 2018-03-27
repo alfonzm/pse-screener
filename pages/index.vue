@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="index">
     <template v-for="date in dates">
       <a href="javascript:;" @click="onSelectDate(date)">{{ date }}</a> /
     </template>
@@ -8,57 +8,59 @@
 
     <input v-model="searchSymbol" type="text" placeholder="Filter symbol..."/>
 
-    <br><br>
+    <section id="filters">
+      <strong>Filters <a href="javascript:;" @click="clearFilters">(clear)</a> : </strong>
+      <template v-for="filter in ['positive_change', 'negative_change', 'positive_vol_change', 'green_candle', 'red_candle', 'uptrend_short', 'uptrend_medium', 'downtrend_short', 'sideways_short', 'aots', 'oversold', 'near_resistance', 'near_support']">
+        <a href="javascript:;" @click="toggleFilter(filter)">{{ Utils().replaceUnderscoreWithSpace(filter) }}</a>
+        <template v-if="filters.includes(filter)">*</template> /
+      </template>
+    </section>
 
-    <strong>Filters <a href="javascript:;" @click="clearFilters">(clear)</a>: </strong>
+    <section id="setups">
+      <strong>Setups <a href="javascript:;" @click="clearSetups">(clear)</a> : </strong>
+      <template v-for="setup in ['breakout', 'bounce', 'near_support', 'near_resistance']">
+        <a href="javascript:;" @click="toggleSetup(setup)">{{ Utils().replaceUnderscoreWithSpace(setup) }}</a>
+        <!-- <template v-if="setups.includes(setup)">*</template> / -->
+        /
+      </template>
+    </section>
 
-    <a href="javascript:;" @click="toggleFilter('positive_change')">positive change</a><template v-if="filters.includes('positive_change')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('negative_change')">negative change</a><template v-if="filters.includes('negative_change')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('positive_vol_change')">positive vol change</a><template v-if="filters.includes('positive_vol_change')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('green_candle')">green candle</a><template v-if="filters.includes('green_candle')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('red_candle')">red candle</a><template v-if="filters.includes('red_candle')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('uptrend_short')">uptrend short</a><template v-if="filters.includes('uptrend_short')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('uptrend_medium')">uptrend medium</a><template v-if="filters.includes('uptrend_medium')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('downtrend_short')">downtrend short</a><template v-if="filters.includes('downtrend_short')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('sideways_short')">sideways short</a><template v-if="filters.includes('sideways_short')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('aots')">aots</a><template v-if="filters.includes('aots')">*</template> /
-    <a href="javascript:;" @click="toggleFilter('oversold')">oversold</a><template v-if="filters.includes('oversold')">*</template> /
+    <section id="stock-data">
+      <div v-if="status == 'loading'">Loading...</div>
+      <div v-else-if="status == 'error'">ERROR LOADING STOCKS</div>
 
-    <br><br>
+      <div v-if="status != 'loading' && stocks.length <= 0">No stocks found for {{ moment(date).format('MMMM D, YYYY') }}</div>
+      <table v-else-if="status == 'done' && stocks.length > 0" cellspacing="0">
+        <thead>
+          <td v-for="header in ['stock', 'open', 'last', '%change', 'vol_change', 'trend_short', 'trend_medium', 'distance_from_resistance_1', 'distance_from_support_1', 'macd(12,26,9)', 'rsi(14)', 'rsi(14)_status', 'aots', 'candlestick(1)']">
+            <a href="javascript:;" @click="toggleSort(header)">
+              {{ header }}
+            </a>
+            <template v-if="sortType(header) == 'desc'"> ⬇</template>
+            <template v-if="sortType(header) == 'asc'"> ⬆</template>
+          </td>
+        </thead>
+        <tbody>
+          <tr v-for="stock in filteredStocks">
+            <td><a :href="'https://investagrams.com/stock/'+stock.stock" target="_blank">{{ stock.stock }}</a></td>
+            <td>{{ stock.open }}</td>
+            <td>{{ stock.last }}</td>
+            <td>{{ stock['%change'] }}</td>
+            <td>{{ volChangeFromVolumeAverage(stock) }}</td>
+            <td>{{ stock.trend_short }}</td>
+            <td>{{ stock.trend_medium }}</td>
+            <td>{{ distanceFromResistance1(stock) }}</td>
+            <td>{{ distanceFromSupport1(stock) }}</td>
+            <td>{{ stock['macd(12,26,9)'] }}</td>
+            <td>{{ round(stock['rsi(14)']) }}</td>
+            <td>{{ stock['rsi(14)_status'] }}</td>
+            <td>{{ aots(stock) }}</td>
+            <td>{{ stock['candlestick(1)'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
 
-    <div v-if="status == 'loading'">Loading...</div>
-    <div v-else-if="status == 'error'">ERROR LOADING STOCKS</div>
-
-    <div v-if="status != 'loading' && stocks.length <= 0">No stocks found for {{ moment(date).format('MMMM D, YYYY') }}</div>
-    <table v-else-if="status == 'done' && stocks.length > 0">
-      <thead>
-        <td>chart</td>
-        <td v-for="header in ['stock', '%change', 'vol_change', 'trend_short', 'trend_medium', 'distance_from_resistance_1', 'distance_from_support_1', 'macd(12,26,9)', 'rsi(14)', 'rsi(14)_status', 'aots', 'candlestick(1)']">
-          <a href="javascript:;" @click="toggleSort(header)">
-            {{ header }}
-          </a>
-          <template v-if="sortType(header) == 'desc'"> (v)</template>
-          <template v-if="sortType(header) == 'asc'"> (^)</template>
-        </td>
-      </thead>
-      <tbody>
-        <tr v-for="stock in filteredStocks">
-          <td><a :href="'https://investagrams.com/stock/'+stock.stock" target="_blank">chart</a></td>
-          <td>{{ stock.stock }}</td>
-          <td>{{ stock['%change'] }}</td>
-          <td>{{ volChangeFromVolumeAverage(stock) }}</td>
-          <td>{{ stock.trend_short }}</td>
-          <td>{{ stock.trend_medium }}</td>
-          <td>{{ distanceFromResistance1(stock) }}</td>
-          <td>{{ distanceFromSupport1(stock) }}</td>
-          <td>{{ stock['macd(12,26,9)'] }}</td>
-          <td>{{ round(stock['rsi(14)']) }}</td>
-          <td>{{ stock['rsi(14)_status'] }}</td>
-          <td>{{ aots(stock) }}</td>
-          <td>{{ stock['candlestick(1)'] }}</td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </template>
 
@@ -80,6 +82,7 @@ export default {
 
       searchSymbol: null,
       filters: [],
+      setups: [],
       sorts: [],
     }
   },
@@ -106,14 +109,16 @@ export default {
           positive_change: s => s['%change'] > 0,
           negative_change: s => s['%change'] < 0,
           positive_vol_change: s => this.volChangeFromVolumeAverage(s) > 0,
-          green_candle: s => s.close > s.open,
-          red_candle: s => s.close < s.open,
+          green_candle: s => s.last > s.open,
+          red_candle: s => s.last < s.open,
           uptrend_short: s => s.trend_short == 'UPTREND',
           uptrend_medium: s => s.trend_medium == 'UPTREND',
           sideways_short: s => s.trend_short == 'SIDEWAYS',
           downtrend_short: s => s.trend_short == 'DOWNTREND',
           aots: s => this.aots(s) == true,
           oversold: s => s['rsi(14)_status'] == 'OVERSOLD',
+          near_resistance: s => this.distanceFromResistance1(s) < 30,
+          near_support: s => this.distanceFromSupport1(s) < 30,
         }
 
         _.map(this.filters, (filter) => {
@@ -153,19 +158,60 @@ export default {
     moment(d) {
       return moment(d)
     },
+    Utils() {
+      return Utils
+    },
     sortType(sortField) {
       const sort = _.find(this.sorts, { field: sortField })
       if(sort)
         return sort.type
     },
+    clearSetups() {
+      this.setups = []
+    },
     clearFilters() {
       this.filters = []
     },
-    toggleFilter(filter) {
-      this.filters = _.xor(this.filters, [filter])
+    clearSorts() {
+      this.sorts = []
     },
-    toggleSort(sortField) {
+    toggleSetup(setup) {
+      this.clearFilters()
+      this.clearSorts()
+
+      // this.setups = this.setups.includes(setup) ? [] : [setup]
+
+      const setupFunctions = {
+        breakout: (setup) => {
+          this.toggleFilter(['sideways_short', 'positive_change', 'positive_vol_change'])
+          this.toggleSort('distance_from_resistance_1', 'desc')
+        },
+        bounce: (setup) => {
+
+        },
+        near_resistance: (setup) => {
+          this.toggleFilter(['near_resistance'])
+          this.toggleSort('near_resistance_1', 'asc')
+        },
+        near_support: (setup) => {
+          this.toggleFilter(['near_support'])
+          this.toggleSort('near_support_1', 'asc')
+        },
+      }
+
+      // _.map(this.setups, setupFunctions[setup])
+      setupFunctions[setup]()
+    },
+    toggleFilter(filter) {
+      this.filters = _.xor(this.filters, filter instanceof Array ? filter : [filter])
+    },
+    toggleSort(sortField, sortType) {
       let sort = _.find(this.sorts, { field: sortField })
+
+      if(sortType) {
+        this.sorts = _.union(this.sorts, { field: sortField, type: sortType })
+      }
+
       if(sort) {
         if(sort.type == 'desc') {
           sort.type = 'asc'
@@ -176,13 +222,6 @@ export default {
       } else {
         this.sorts.push({ field: sortField, type: 'desc' })
       }
-      // this.sorts = _.xorBy(this.sorts,  'field')
-      // let sort = { field: sortField }
-      // if(!this.sorts.includes(sortField)) {
-      //   sort.type = 'desc'
-      // } else {
-      //   sort.type = sort.type == 'desc' ? 'asc' : 'desc'
-      // }
     },
     onSelectDate(date) {
       this.fetchByDate(moment(date, 'YYYYMMD'))
@@ -219,16 +258,32 @@ export default {
     aots(stock) {
       return (stock.ma_20 > stock.ma_50) && (stock.ma_50 > stock.ma_100)
     },
+    candleTop(stock) {
+      // get the top price of candle (last if green, open if red)
+      return stock.last > stock.open ? stock.last : stock.open
+    },
+    candleBottom(stock) {
+      // get the bottom price of candle (last if red, open if green)
+      return stock.last < stock.open ? stock.last : stock.open
+    },
     volChangeFromVolumeAverage(stock, sma = 10) {
       const volAverage = stock[`volumesma(${sma})`]
       const vol = stock.volume
       return _.round(((vol - volAverage)/volAverage) * 100, 2)// + " " + `${vol} ${volAverage}`
     },
     distanceFromResistance1(stock) {
-      return _.round(((stock.close - stock.resistance_1) / stock.resistance_1) * 100, 3)
+      const roof = stock.resistance_1 - stock.support_1
+      const candleTopPosition = this.candleTop(stock) - stock.support_1
+      const distance = (roof - candleTopPosition) / roof
+      return _.round(distance * 100, 3)
+      // return _.round(((this.candleTop(stock) - stock.resistance_1) / stock.resistance_1) * 100, 3)
     },
     distanceFromSupport1(stock) {
-      return _.round(((stock.close - stock.support_1) / stock.support_1) * 100, 3)
+      const roof = (stock.resistance_1 - stock.support_1)
+      const candleBottomPosition = this.candleBottom(stock) - stock.support_1
+      const distance = (roof - candleBottomPosition) / roof
+      return _.round(distance * 100, 3)
+      // return _.round(((this.candleBottom(stock) - stock.support_1) / stock.support_1) * 100, 3)
     },
   },
   head () {
@@ -240,4 +295,24 @@ export default {
 </script>
 
 <style scoped>
+#index section {
+  margin: 1em 0;
+}
+
+#index {
+  font-family: Lato;
+  font-size: 11pt;
+}
+
+#index table tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+#index table tr:hover {
+  background-color: #eee;
+}
+
+#index table td {
+  padding: 4px;
+}
 </style>

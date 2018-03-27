@@ -14,7 +14,6 @@ router.get('/dailies/:date?', function (req, res, next) {
 	const dateForFilename = date.format('YYYYMMDD')
 
 	const returnResult = (daily) => {
-		console.log(daily)
 		let dailyObject = daily.toObject()
 		dailyObject.data = _.reject(dailyObject.data, (d) => { return Utils.indexes.includes(d.stock) })
 		res.json(dailyObject)

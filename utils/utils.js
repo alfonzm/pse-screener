@@ -11,5 +11,10 @@ export default {
 		return latestTradingDate.startOf('day')
 	},
 	csvHeaders: csvHeaders,
-	indexes: ['PSEI', 'MINI', 'PROP', 'SERV', 'INDU', 'FINA', 'HOLD', 'ALLS']
+	indexes: ['PSEI', 'MINI', 'PROP', 'SERV', 'INDU', 'FINA', 'HOLD', 'ALLS'],
+
+	// string manipulation
+	replaceUnderscoreWithSpace(string) {
+		return string.replace(/_/g, ' ');
+	},
 }
