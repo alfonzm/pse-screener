@@ -27,7 +27,7 @@ const PASSWORD_SELECTOR = '#WelcomePageMainContent_ctl00_Password'
 const BUTTON_SELECTOR = '#LoginButton'
 
 async function crawlInvestagramTerminal() {
-	const browser = await puppeteer.launch({headless: false})
+	const browser = await puppeteer.launch()
 	const page = await browser.newPage()
 	page.setDefaultNavigationTimeout(0)
 
