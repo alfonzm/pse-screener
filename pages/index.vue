@@ -4,7 +4,14 @@
       <a href="javascript:;" @click="onSelectDate(date)">{{ date }}</a> /
     </template>
     
-    <h2>{{ moment(date).format('MMMM D, YYYY') }}</h2>
+    <h2>
+      <template v-if="date">
+        {{ moment(date).format('MMMM D, YYYY') }}
+      </template>
+      <template v-else>
+        Select a date above...
+      </template>
+    </h2>
 
     <input v-model="searchSymbol" type="text" placeholder="Filter symbol..."/>
 
@@ -94,7 +101,7 @@ export default {
   },
   mounted() {
     this.status = 'loading'
-    this.fetchByDate()
+    this.fetchByDate(Utils.getLatestTradingDate())
   },
   computed: {
     filteredStocks() {
@@ -227,7 +234,7 @@ export default {
       this.fetchByDate(moment(date, 'YYYYMMD'))
     },
     fetchByDate(date) {
-      this.date = date || Utils.getLatestTradingDate()
+      this.date = date
 
       this.status = 'loading'
       this.stocks = []

@@ -44,7 +44,11 @@ function getByDate(daily, momentDate, callback) {
 			$lt: tomorrow.toDate()
 		}
 	}).exec((err, dailies) => {
-		callback(dailies[0])
+		if(dailies && dailies.length > 0){
+			callback(dailies[0])
+		} else {
+			callback(null)
+		}
 	})
 }
 

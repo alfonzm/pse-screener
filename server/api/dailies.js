@@ -11,7 +11,7 @@ const router = Router()
 /* GET latest daily stock data */
 router.get('/dailies/:date?', function (req, res, next) {
 	const date = moment(req.params.date, 'YYYYMMDD').startOf('day') || Utils.getLatestTradingDate()
-	const dateForFilename = date.format('YYYYMMDD')
+	const dateForFilename = Utils.formatDate(date)
 
 	const returnResult = (daily) => {
 		let dailyObject = daily.toObject()
@@ -30,14 +30,14 @@ router.get('/dailies/:date?', function (req, res, next) {
 			})
 			.on('done', (error) => {
 				if(error) {
-					console.log("ERROR reading csv", error)
-					res.json(error)
+					console.log("ERROR reading csv:\n", error)
+					res.send(error)
 					return
+				} else {
+					var daily = new Daily({ data: stocks, date: date })
+					daily.save()
+					returnResult(daily)
 				}
-
-				var daily = new Daily({ data: stocks, date: date })
-				daily.save()
-				returnResult(daily)
 			})
 		} else {
 			returnResult(daily)
