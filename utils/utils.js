@@ -11,7 +11,7 @@ export default {
 		return latestTradingDate.startOf('day')
 	},
 	formatDate: (momentDate) => {
-		momentDate.format('YYYYMMDD')
+		return momentDate.format('YYYYMMDD')
 	},
 	csvHeaders: csvHeaders,
 	indexes: ['PSEI', 'MINI', 'PROP', 'SERV', 'INDU', 'FINA', 'HOLD', 'ALLS'],
