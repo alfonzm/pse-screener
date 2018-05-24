@@ -15,8 +15,8 @@ const port = process.env.PORT || 3000
 app.set('port', port)
 
 // Import API Routes
-app.use('/api', api)
 app.use('/loader', loader)
+app.use('/api', api)
 
 // Import and Set Nuxt.js options
 let config = require('../nuxt.config.js')

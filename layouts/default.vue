@@ -1,19 +1,32 @@
 <template>
   <div>
-    <nuxt/>
-    <!-- <my-footer/> -->
+    <my-header/>
+    <main>
+      <nuxt/>
+    </main>
   </div>
 </template>
 
 <script>
-// import MyFooter from '~/components/Footer.vue'
+import MyHeader from '~/components/Header.vue'
 
 export default {
   components: {
-    // MyFooter
+    MyHeader
   }
 }
 </script>
 
-<style>
+<style lang="sass">
+body
+  margin: 0
+  font-family: Lato;
+
+main
+  margin: 10px
+
+nav
+  a 
+    margin-right: 10px
+    font-weight: 700
 </style>

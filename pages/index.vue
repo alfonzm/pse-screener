@@ -78,6 +78,7 @@ import _ from 'lodash'
 import Utils from '../utils/utils'
 
 export default {
+  layout: 'default',
   data() {
     return {
       date: null,
@@ -307,7 +308,6 @@ export default {
 }
 
 #index {
-  font-family: Lato;
   font-size: 11pt;
 }
 
