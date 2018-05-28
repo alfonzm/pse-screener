@@ -1,4 +1,5 @@
 import moment from 'moment'
+import Utils from './utils'
 
 export default {
 	// Commission thingies
@@ -25,7 +26,7 @@ export default {
 		return fees + salesTax
 	},
 
-
+	// Trading calculations
 	getBuyCost(price, quantity) {
 		return (price * quantity) + this.getBuyFees(price, quantity)
 	},
@@ -39,11 +40,18 @@ export default {
 
 		return this.getSellCost(exit, quantity) - this.getBuyCost(entry, quantity)
 	},
-	getRiskRewardRatio(entry, stopLoss, targetPrice) {
+	getRiskRewardRatio(entry, stopLoss, targetPrice, precision = 100) {
 		if(!entry || !stopLoss || !targetPrice) {
 			return 0
 		}
-		
-		return (targetPrice - entry) / (entry - stopLoss)
-	}
+
+		if(entry == stopLoss) {
+			return 0
+		}
+
+		return Math.round((targetPrice - entry) / (entry - stopLoss) * precision) / precision
+	},
+	getPercentChange(sellCost, buyCost) {
+		return Math.round((sellCost / buyCost) * 100 * 100)/100 
+	},
 }

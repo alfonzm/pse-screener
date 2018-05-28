@@ -1,31 +1,28 @@
 <template lang="jade">
   div
-    table
-      tr
-        td stock
-        td #
-        td buy cost
-        td entry
-        td stoploss
-        td trailing stop
-        td target price
-        td risk/reward
-        td SL1 loss
-        td trail stop loss/gain
-        td TP profit
+    table.stocks-table
+      tbody
+        tr
+          th.stock Stock
+          th.quantity #
+          th.entry Entry
+          th.target-price TP
+          th.stop-loss Stop Loss
+          th.trailing-stop Trailing Stop
+          th.buy-cost Total Cost
+          th.risk-reward Risk/Reward
+          th.target-price-profit Profit
+          th.stop-loss-loss SL Loss
+          th.trailing-stop-loss-gain Trail Loss
       
-      plan
+        plan
+        plan
+        plan
+
+    button Add trade plan
 </template>
 
-<style scoped lang="sass">
-input
-  display: inline-block
-td
-  padding: 8px
-</style>
-
 <script>
-import calc from '~/utils/calc'
 import Plan from '~/components/Plan.vue'
 
 export default {
@@ -37,3 +34,42 @@ export default {
   }
 }
 </script>
+
+<style lang="sass">
+$baseColumnWidth: 100px
+
+table.stocks-table
+  table-layout: fixed
+  border-spacing: 0
+
+  td, th
+    text-align: center
+
+    input
+      width: 100%
+
+.stock
+  width: 60px
+.quantity
+  width: $baseColumnWidth
+.buy-cost
+  width: $baseColumnWidth
+.entry
+  width: $baseColumnWidth
+.stop-loss
+  width: $baseColumnWidth
+.trailing-stop
+  width: $baseColumnWidth
+.target-price
+  width: $baseColumnWidth
+.risk-reward
+  width: $baseColumnWidth
+.stop-loss-loss
+  width: $baseColumnWidth
+.trailing-stop-loss-gain
+  width: $baseColumnWidth
+.target-price-profit
+  width: 150px
+
+
+</style>

@@ -1,36 +1,40 @@
 <template lang="jade">
   tr
-    td
+    td.stock
       input(type="text" v-model="stock")
-    td
+    td.quantity
       input(type="number" v-model="quantity")
-    td
-      {{ buyCost }}
-      //- input(type="number" v-model="buyCost")
-    td
+    td.entry
       input(type="number" v-model="entry")
-    td
-      input(type="number" v-model="stopLoss")
-    td
-      input(type="number" v-model="trailingStop")
-    td
+    td.target-price
       input(type="number" v-model="targetPrice")
-    td
+    td.stop-loss
+      input(type="number" v-model="stopLoss")
+    td.trailing-stop
+      input(type="number" v-model="trailingStop")
+    td.buy-cost
+      {{ currencify(buyCost) }}
+    td.risk-reward
       {{ riskReward }}
-    td
-      {{ stopLossLoss }}
-    td
-      {{ trailingStopLossGain }}
-    td
-      {{ targetPriceProfit }}
+    td.target-price-profit
+      {{ currencify(targetPriceProfit) }} 
+      template(v-if="targetPriceProfit && buyCost") ({{ Calc.getPercentChange(targetPriceProfit, buyCost) }}%)
+    td.stop-loss-loss
+      {{ currencify(stopLossLoss) }}
+      template(v-if="stopLossLoss && buyCost") ({{ Calc.getPercentChange(stopLossLoss, buyCost) }}%)
+    td.trailing-stop-loss-gain
+      {{ currencify(trailingStopLossGain) }}
 </template>
 
 <script>
-import calc from '~/utils/calc'
+import Calc from '~/utils/calc'
+import Utils from '~/utils/utils'
 
 export default {
   data() {
     return {
+      Calc,
+      
       stock: null,
       quantity: null,
       buyCost: null,
@@ -62,12 +66,18 @@ export default {
     },
   },
   methods: {
+    Calc() {
+      return Calc
+    },
+    currencify(amount) {
+      return Utils.currencify(amount)
+    },
     compute() {
-      this.buyCost = calc.getBuyCost(this.entry, this.quantity)
-      this.targetPriceProfit = calc.getProfit(this.entry, this.targetPrice, this.quantity)
-      this.stopLossLoss = calc.getProfit(this.entry, this.stopLoss, this.quantity)
-      this.trailingStopLossGain = calc.getProfit(this.entry, this.trailingStop, this.quantity)
-      this.riskReward = "1:" + calc.getRiskRewardRatio(this.entry, this.stopLoss, this.targetPrice)
+      this.buyCost = Calc.getBuyCost(this.entry, this.quantity)
+      this.targetPriceProfit = Calc.getProfit(this.entry, this.targetPrice, this.quantity)
+      this.stopLossLoss = Calc.getProfit(this.entry, this.stopLoss, this.quantity)
+      this.trailingStopLossGain = Calc.getProfit(this.entry, this.trailingStop, this.quantity)
+      this.riskReward = "1:" + Calc.getRiskRewardRatio(this.entry, this.stopLoss, this.targetPrice)
     }
   },
   mounted() {
@@ -77,4 +87,18 @@ export default {
 </script>
 
 <style scoped lang="sass">
+td
+  padding: 4px 
+
+  input[type="number"]
+    text-align: center
+
+  input
+    font-family: Lato
+    padding: 3px
+    font-size: 1em
+    border: 0
+    outline: none
+    background-color: #f2f2f2
+
 </style>

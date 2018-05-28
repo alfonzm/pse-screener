@@ -74,11 +74,7 @@ function convertHtmlToCsv(html, browser) {
 		headers.push($(this).text())
 	})
 
-	console.log('headers ', headers)
-
 	const stockRows = table.find('tbody').first().find('tr')
-
-	console.log('stock rows ', stockRows.length)
 
 	stockRows.each(function(i, stockRow) {
 		let stock = {}
